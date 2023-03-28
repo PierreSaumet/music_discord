@@ -1,7 +1,7 @@
 import discord
 import os
 
-from discord.ext import commands,tasks
+from discord.ext import commands, tasks
 from dotenv import load_dotenv
 
 from srcs.music import Music
@@ -9,8 +9,8 @@ from srcs.utils import Colors
 
 load_dotenv()
 
+
 class ETCDiscordBot(commands.Bot):
-    
     def __init__(self):
         super().__init__(command_prefix="!", intents=discord.Intents.all())
         self.is_debug = False
