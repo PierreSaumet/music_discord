@@ -1,8 +1,11 @@
 import discord
+import time
 import yt_dlp
 
 from discord.ext import commands
 from random import randrange
+
+from srcs.utils import create_embed
 
 class Music(commands.Cog):
     def __init__(self, bot):
@@ -44,7 +47,7 @@ class Music(commands.Cog):
             return
 
         channel = ctx.message.author.voice.channel
-        await ctx.send("I am connected, ready to rock!")
+
         self.is_connected = True
         await channel.connect()
 
@@ -113,6 +116,7 @@ class Music(commands.Cog):
 
     @commands.command(name='play', help="This command plays a youtube's url")
     async def play(self, ctx):
+        youtube_url = "https://www.youtube.com/watch?"
         msg = ctx.message.content.split()
         voice_client = ctx.message.guild.voice_client
         
@@ -120,13 +124,23 @@ class Music(commands.Cog):
             await ctx.send("You are not connected to a voice channel")
             return
 
+        if not self.is_connected:
+            await self.join(ctx)
+            time.sleep(5)
+
         if len(msg) == 1:
             await ctx.send("**ERROR, please try again**")
             return 
 
-        if not self.is_connected:
-            await self.join(ctx)
+        # Case of Youtube Url with/without nbr of repeatition
+        if (len(msg) == 2 and len(msg[1]) > len(youtube_url)
+            and msg[1][0:len(youtube_url)] == youtube_url):
 
+            await ctx.message.delete()
+            await self.read_from_url(ctx, msg[1])
+            return     
+
+        # choose between 5 musics
         try:
             async with ctx.typing():
                 with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
@@ -137,3 +151,26 @@ class Music(commands.Cog):
             await ctx.send('**Now playing:** {}'.format("test"))
         except:
             await ctx.send('**ERROR, please try again**')
+
+    async def read_from_url(self, ctx, url):
+        voice_client = ctx.message.guild.voice_client
+
+        try:
+            async with ctx.typing():
+                with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
+                    data = ydl.extract_info(url, download=False)
+                    new_url = data['url']
+                voice_client.play(discord.FFmpegPCMAudio(new_url, **self.ffmpeg_options))
+            
+            embed = create_embed(
+                discord.Color.fuchsia(),
+                "**{}**".format(data['title']),
+                "Now playing:",
+                data['thumbnail'],
+                "{}\n From YouTube with Love <3.".format(url)
+            )
+            await ctx.send(embed=embed)
+        except:
+            await ctx.send('**ERROR, please try again**')
+    
+
