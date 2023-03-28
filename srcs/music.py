@@ -2,6 +2,7 @@ import discord
 import yt_dlp
 
 from discord.ext import commands
+from random import randrange
 
 class Music(commands.Cog):
     def __init__(self, bot):
@@ -46,6 +47,27 @@ class Music(commands.Cog):
         await ctx.send("I am connected, ready to rock!")
         self.is_connected = True
         await channel.connect()
+
+        nbr = randrange(0, 5)
+        if (nbr == 0):
+            hello_mp3 = "srcs/mp3/hello_en.mp3"
+        elif (nbr == 1):
+            hello_mp3 = "srcs/mp3/hello_es.mp3"
+        elif (nbr == 2):
+            hello_mp3 = "srcs/mp3/hello_fr.mp3"
+        elif (nbr == 3):
+            hello_mp3 = "srcs/mp3/hello_pt.mp3"
+        else:
+            hello_mp3 = "srcs/mp3/hello_zh-CN.mp3"
+        
+        voice_client = ctx.message.guild.voice_client
+        try:
+            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(hello_mp3))
+            voice_client.play(
+                source, after=lambda e: print(f"Player error: {e}") if e else None
+            )
+        except:
+            await ctx.send("The bot cannot say hello.")
 
     @commands.command(name='leave', help='This command makes the bot leave the voie channel.')
     async def leave(self, ctx):
