@@ -1,6 +1,8 @@
 import discord
 
 from datetime import timedelta
+from random import randrange
+
 from pytube import Search
 
 
@@ -26,22 +28,26 @@ def get_list_videos(message):
         tmp_dct["choice"] = i + 1
         tmp_dct["title"] = s.results[i].title
         tmp_dct["author"] = s.results[i].author
+        tmp_dct["thumb"] = s.results[i].thumbnail_url
         try:
             tmp_dct["length"] = str(
                 timedelta(
                     seconds=int(s.results[i].vid_info["videoDetails"]["lengthSeconds"])
                 )
             )
+            tmp_dct["url"] = url + s.results[i].vid_info["videoDetails"]["videoId"]
         except KeyError:
-            print({Colors.RED} + "Error in gettings 5 videos.", {Colors.END})
+            print(
+                "{0}{1}{2}".format(Colors.RED, "Error in getting 5 videos.", Colors.END)
+            )
             return 1
-        tmp_dct["url"] = url + s.results[i].vid_info["videoDetails"]["videoId"]
+
         result_list.append(tmp_dct)
 
     return result_list
 
 
-def create_embed(colour, title, author, url, description):
+def create_embed(colour, title, author, url, description, length=None):
     embed = discord.Embed(
         colour=colour,
         title=title,
@@ -50,5 +56,25 @@ def create_embed(colour, title, author, url, description):
 
     embed.set_author(name=author)
     embed.set_image(url=url)
+    if length:
+        embed.set_footer(text=length)
 
     return embed
+
+
+async def cleanup_msgs(msgs_to_del):
+    for item in msgs_to_del:
+        await item[0].delete()
+    return
+
+
+async def choose_hello_msg():
+    hello_files = {
+        0: "srcs/mp3/hello_en.mp3",
+        1: "srcs/mp3/hello_es.mp3",
+        2: "srcs/mp3/hello_fr.mp3",
+        3: "srcs/mp3/hello_pt.mp3",
+        4: "srcs/mp3/hello_zh-CN.mp3",
+    }
+    nbr = randrange(0, 5)
+    return hello_files[nbr]
