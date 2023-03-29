@@ -8,8 +8,7 @@ from random import randrange
 
 from discord.ext import commands
 
-
-from srcs.utils import create_embed, get_list_videos, cleanup_msgs, choose_hello_msg
+from srcs.utils import *
 
 
 class Music(commands.Cog):
@@ -17,7 +16,8 @@ class Music(commands.Cog):
         self.bot = bot
         self.is_connected = False
         self.ffmpeg_options = {
-            "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 -probesize 200M",
+            "before_options": "-reconnect 1 -reconnect_streamed 1 "
+            "-reconnect_delay_max 5 -probesize 200M",
             "options": "-vn",
         }
         self.ydl_opts = {
@@ -39,7 +39,7 @@ class Music(commands.Cog):
             "quiet": True,
             "no_warnings": True,
             "default_search": "auto",
-            "source_address": "0.0.0.0",  # bind to ipv4 since ipv6 addresses cause issues sometimes
+            "source_address": "0.0.0.0",
         }
 
     @commands.command(
@@ -60,18 +60,17 @@ class Music(commands.Cog):
         await channel.connect()
 
         voice_client = ctx.message.guild.voice_client
+        msg = await choose_hello_msg()
         try:
-            source = discord.PCMVolumeTransformer(
-                discord.FFmpegPCMAudio(choose_hello_msg())
-            )
+            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(msg))
             voice_client.play(
                 source, after=lambda e: print(f"Player error: {e}") if e else None
             )
-        except:
+        except Exception:
             await ctx.send("The bot cannot say hello.")
 
     @commands.command(
-        name="leave", help="This command makes the bot leave the voie channel."
+        name="leave", help="This command makes the bot leave the channel."
     )
     async def leave(self, ctx):
         voice_client = ctx.message.guild.voice_client
@@ -84,7 +83,7 @@ class Music(commands.Cog):
 
         await ctx.send("The bot is not connected to a voice channel.")
 
-    @commands.command(name="pause", help="This command pauses the current stream.")
+    @commands.command(name="pause", help="This command pauses the stream.")
     async def pause(self, ctx):
         voice_client = ctx.message.guild.voice_client
 
@@ -94,7 +93,7 @@ class Music(commands.Cog):
 
         await ctx.send("The bot is not playing anything.")
 
-    @commands.command(name="resume", help="This command resumes the current stream.")
+    @commands.command(name="resume", help="This command resumes the stream.")
     async def resume(self, ctx):
         voice_client = ctx.message.guild.voice_client
 
@@ -104,7 +103,7 @@ class Music(commands.Cog):
 
         await ctx.send("The bot was not playing anything.")
 
-    @commands.command(name="stop", help="This command stops the current stream")
+    @commands.command(name="stop", help="This command stops the stream")
     async def stop(self, ctx):
         voice_client = ctx.message.guild.voice_client
 
@@ -225,5 +224,5 @@ class Music(commands.Cog):
                     "{}\n From YouTube with Love <3.".format(url),
                 )
                 await ctx.send(embed=embed)
-        except:
+        except Exception:
             await ctx.send("**ERROR, please try again**")
