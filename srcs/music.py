@@ -1,11 +1,15 @@
-import discord
+import asyncio
 import time
+
+import discord
 import yt_dlp
 
-from discord.ext import commands
 from random import randrange
 
-from srcs.utils import create_embed
+from discord.ext import commands
+
+
+from srcs.utils import create_embed, get_list_videos, cleanup_msgs, choose_hello_msg
 
 
 class Music(commands.Cog):
@@ -55,21 +59,11 @@ class Music(commands.Cog):
         self.is_connected = True
         await channel.connect()
 
-        nbr = randrange(0, 5)
-        if nbr == 0:
-            hello_mp3 = "srcs/mp3/hello_en.mp3"
-        elif nbr == 1:
-            hello_mp3 = "srcs/mp3/hello_es.mp3"
-        elif nbr == 2:
-            hello_mp3 = "srcs/mp3/hello_fr.mp3"
-        elif nbr == 3:
-            hello_mp3 = "srcs/mp3/hello_pt.mp3"
-        else:
-            hello_mp3 = "srcs/mp3/hello_zh-CN.mp3"
-
         voice_client = ctx.message.guild.voice_client
         try:
-            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(hello_mp3))
+            source = discord.PCMVolumeTransformer(
+                discord.FFmpegPCMAudio(choose_hello_msg())
+            )
             voice_client.play(
                 source, after=lambda e: print(f"Player error: {e}") if e else None
             )
@@ -138,7 +132,6 @@ class Music(commands.Cog):
             await ctx.send("**ERROR, please try again**")
             return
 
-        # Case of Youtube Url with/without nbr of repeatition
         if (
             len(msg) == 2
             and len(msg[1]) > len(youtube_url)
@@ -146,22 +139,72 @@ class Music(commands.Cog):
         ):
 
             await ctx.message.delete()
-            await self.read_from_url(ctx, msg[1])
+            await self.read_from_url(ctx, msg[1], True)
             return
 
-        # choose between 5 musics
+        data = str()
+        for i in range(1, len(msg)):
+            data += msg[i]
+            if i + 1 < len(msg):
+                data += " "
+
+        choices_lst = get_list_videos(data)
+        if choices_lst == 1:
+            await ctx.send("**ERROR, in getting videos, try again.**")
+            return
+
+        # display 5 first messages:
+        msgs_to_del = list()
+        for index in choices_lst:
+            embed = create_embed(
+                discord.Color.fuchsia(),
+                "**{}**".format(index["title"]),
+                "Choice: {}".format(index["choice"]),
+                index["thumb"],
+                "By **{0}**\n{1}".format(index["author"], index["url"]),
+                "Length: {}".format(index["length"]),
+            )
+            tmp_msg = await ctx.send(embed=embed)
+            msgs_to_del.append((tmp_msg, tmp_msg.id))
+
+        def check(m: discord.Message):  # Checks author's choice
+            if m.author != ctx.message.author:
+                return False
+
+            answers = ["0", "1", "2", "3", "4", "5"]
+
+            for item in answers:
+                if m.content == item:
+                    return True
+            return False
+
+        rep = ""
         try:
-            async with ctx.typing():
-                with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
-                    data = ydl.extract_info(msg[1], download=False)
-                    url = data["url"]
-                voice_client.play(discord.FFmpegPCMAudio(url, **self.ffmpeg_options))
+            rep = await self.bot.wait_for("message", check=check, timeout=100.0)
+        except asyncio.TimeoutError:
+            await cleanup_msgs(msgs_to_del)
+            await ctx.send("Sorry, I waited 100 secondes...")
+            return
 
-            await ctx.send("**Now playing:** {}".format("test"))
-        except:
-            await ctx.send("**ERROR, please try again**")
+        await cleanup_msgs(msgs_to_del)
+        for item in choices_lst:
+            if rep.content == "0":
+                await ctx.send("**For now, I can only play these songs, sorry.**")
+                return
+            if str(item["choice"]) == rep.content:
+                embed = create_embed(
+                    discord.Color.fuchsia(),
+                    "**{}**".format(index["title"]),
+                    "You choice: {}".format(index["choice"]),
+                    index["thumb"],
+                    "By **{0}**\n{1}".format(index["author"], index["url"]),
+                    "Length: {}".format(index["length"]),
+                )
+                await ctx.send(embed=embed)
+                await self.read_from_url(ctx, item["url"], False)
+                return
 
-    async def read_from_url(self, ctx, url):
+    async def read_from_url(self, ctx, url, is_embed):
         voice_client = ctx.message.guild.voice_client
 
         try:
@@ -173,13 +216,14 @@ class Music(commands.Cog):
                     discord.FFmpegPCMAudio(new_url, **self.ffmpeg_options)
                 )
 
-            embed = create_embed(
-                discord.Color.fuchsia(),
-                "**{}**".format(data["title"]),
-                "Now playing:",
-                data["thumbnail"],
-                "{}\n From YouTube with Love <3.".format(url),
-            )
-            await ctx.send(embed=embed)
+            if is_embed:
+                embed = create_embed(
+                    discord.Color.fuchsia(),
+                    "**{}**".format(data["title"]),
+                    "Now playing:",
+                    data["thumbnail"],
+                    "{}\n From YouTube with Love <3.".format(url),
+                )
+                await ctx.send(embed=embed)
         except:
             await ctx.send("**ERROR, please try again**")
