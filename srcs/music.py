@@ -193,11 +193,11 @@ class Music(commands.Cog):
             if str(item["choice"]) == rep.content:
                 embed = create_embed(
                     discord.Color.fuchsia(),
-                    "**{}**".format(index["title"]),
-                    "You choice: {}".format(index["choice"]),
-                    index["thumb"],
-                    "By **{0}**\n{1}".format(index["author"], index["url"]),
-                    "Length: {}".format(index["length"]),
+                    "**{}**".format(item["title"]),
+                    "You choice: {}".format(item["choice"]),
+                    item["thumb"],
+                    "By **{0}**\n{1}".format(item["author"], item["url"]),
+                    "Length: {}".format(item["length"]),
                 )
                 await ctx.send(embed=embed)
                 await self.read_from_url(ctx, item["url"], False)
