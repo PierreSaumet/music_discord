@@ -73,8 +73,11 @@ OR to search for a video, enter !play followed by a search query.
 
 ## Documentation
 discord python = https://discordpy.readthedocs.io/en/stable/
+
 PEP 8 = https://peps.python.org/pep-0008/
+
 youtube_dl = https://youtube-dl.org/
+
 E.T.C = https://wowwiki-archive.fandom.com/wiki/Elite_Tauren_Chieftain
 
 
@@ -157,6 +160,9 @@ OU pour rechercher une vidéo, entrez !play suivi d'une requête de recherche.
 
 ## Documentation
 discord python = https://discordpy.readthedocs.io/en/stable/
+
 PEP 8 = https://peps.python.org/pep-0008/
+
 youtube_dl = https://youtube-dl.org/
+
 E.T.C = https://wowwiki-archive.fandom.com/wiki/Elite_Tauren_Chieftain
