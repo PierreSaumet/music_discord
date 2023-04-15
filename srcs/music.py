@@ -4,15 +4,13 @@ import time
 import discord
 import yt_dlp
 
-from random import randrange
-
 from discord.ext import commands
 
 from srcs.utils import *
 
 
 class Music(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot, historic_db):
         self.bot = bot
         self.is_connected = False
         self.ffmpeg_options = {
@@ -41,9 +39,11 @@ class Music(commands.Cog):
             "default_search": "auto",
             "source_address": "0.0.0.0",
         }
+        print("\n\ntest self ", self.bot.test)
+        self.historic_db = historic_db
 
     @commands.command(
-        name="join", help="This commands make the bot join the voice channel."
+        name="vient", help="This commands make the bot join the voice channel."
     )
     async def join(self, ctx):
         if not ctx.message.author.voice:
@@ -113,7 +113,7 @@ class Music(commands.Cog):
 
         await ctx.send("The bot is not playing anything")
 
-    @commands.command(name="play", help="This command plays a youtube's url")
+    @commands.command(name="joue", help="This command plays a youtube's url")
     async def play(self, ctx):
         youtube_url = "https://www.youtube.com/watch?"
         msg = ctx.message.content.split()
@@ -147,7 +147,7 @@ class Music(commands.Cog):
             if i + 1 < len(msg):
                 data += " "
 
-        choices_lst = get_list_videos(data)
+        choices_lst = get_list_videos_info(data)
         if choices_lst == 1:
             await ctx.send("**ERROR, in getting videos, try again.**")
             return
@@ -210,7 +210,16 @@ class Music(commands.Cog):
             async with ctx.typing():
                 with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
                     data = ydl.extract_info(url, download=False)
+
                     new_url = data["url"]
+
+                    length = convert_int_to_hour(data["duration"])
+
+                    query_hist = self.historic_db.insert_music(
+                        data["uploader"], data["title"], length, url, str(ctx.author.id)
+                    )
+                    self.historic_db.do_query(query_hist, True)
+
                 voice_client.play(
                     discord.FFmpegPCMAudio(new_url, **self.ffmpeg_options)
                 )
