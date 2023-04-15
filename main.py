@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 
 from srcs.music import Music
 from srcs.utils import Colors
+from srcs.users_db import UsersDatabase
 
 load_dotenv()
 
@@ -14,6 +15,7 @@ class ETCDiscordBot(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix="!", intents=discord.Intents.all())
         self.is_debug = False
+        self.users_db = UsersDatabase()
 
     async def on_ready(self):
         users_list = []
@@ -34,6 +36,10 @@ class ETCDiscordBot(commands.Bot):
         """
         await self.add_all_cog()
         print(message)
+
+        self.users_db.creates_tables_if_not_exists()
+        self.users_db.insert_users(users_list)
+        # self.users_db.display_users()
 
     async def add_all_cog(self):
         await self.add_cog(Music(self))
