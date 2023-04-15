@@ -17,10 +17,3 @@ repos:
         entry: flake8 --select=F401
         language: system
         types: [python]
--   repo: local
-    hooks:
-    -   id: flake8-import-order
-        name: flake8 import order
-        entry: flake8-import-order
-        language: system
-        types: [python]
