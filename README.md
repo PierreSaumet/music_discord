@@ -66,7 +66,19 @@ OR to search for a video, enter !play followed by a search query.
     DISCORD_TOKEN=YOUR_TOKEN_HERE   <== WRITE YOUR TOKEN HERE
 ```
 
-7. Start programm.
+7. In the srcs folder, create a 'databases' folder and retrieve the path into the .env file
+```bash
+    cd srcs && mkdir databases
+```
+```bash
+    cd databases && pwd   <== Get path of the folder
+```
+```bash
+    DB_USERS_PATH=YOUR_PATH_TO_DB   <== WRITE PATH HERE
+    DB_MUSIC_PATH=YOUR_PATH_TO_DB   <== WRITE PATH HERE
+```
+
+8. Start programm.
 ```bash
     python3 main.py
 ```
@@ -145,15 +157,27 @@ OU pour rechercher une vidéo, entrez !play suivi d'une requête de recherche.
     sudo apt install ffmpeg
 ```
 
-6. Renommez .env.file en .env et ajoutez votre jeton Discord.
+6. Renommez .env.file en .env et ajoutez votre jeton Discord
 ```bash
     mv .env.file .env
 ```
 ```bash
-    DISCORD_TOKEN=YOUR_TOKEN_HERE   <== WRITE YOUR TOKEN HERE
+    DISCORD_TOKEN=YOUR_TOKEN_HERE   <== ECRIRE LE TOKEN ICI
 ```
 
-7. Lancez le programme.
+7. Dans le dossier srcs, créer un dossier databases et recupérer le chemin pour le fichier .env
+```bash
+    cd srcs && mkdir databases
+```
+```bash
+    cd databases && pwd   <== récuperer le chemin
+```
+```bash
+    DB_USERS_PATH=YOUR_PATH_TO_DB   <== ECRIRE LE CHEMIN ICI
+    DB_MUSIC_PATH=YOUR_PATH_TO_DB   <== ECRIRE LE CHEMIN ICI
+```
+
+8. Lancez le programme.
 ```bash
     python3 main.py
 ```
