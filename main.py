@@ -1,11 +1,14 @@
 import discord
 import os
 
-from discord.ext import commands, tasks
+from discord.ext import commands
 from dotenv import load_dotenv
 
 from srcs.music import Music
 from srcs.utils import Colors
+from srcs.users_db import UsersDatabase
+from srcs.historic_db import MusicHistoric
+from srcs.historic_cmds import HistoricCmds
 
 load_dotenv()
 
@@ -14,6 +17,10 @@ class ETCDiscordBot(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix="!", intents=discord.Intents.all())
         self.is_debug = False
+        self.users_db = UsersDatabase()
+        self.music_historic = MusicHistoric()
+
+        self.test = "test"
 
     async def on_ready(self):
         users_list = []
@@ -35,9 +42,14 @@ class ETCDiscordBot(commands.Bot):
         await self.add_all_cog()
         print(message)
 
+        # Init all Databases
+        self.users_db.creates_tables_if_not_exists()
+        self.users_db.insert_users(users_list)
+        self.music_historic.creates_tables_if_not_exists()
+
     async def add_all_cog(self):
-        await self.add_cog(Music(self))
-        print("add all cog done")
+        await self.add_cog(Music(self, self.music_historic))
+        await self.add_cog(HistoricCmds(self, self.music_historic))
 
 
 if __name__ == "__main__":
