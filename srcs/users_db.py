@@ -15,8 +15,6 @@ class UsersDatabase:
         self.connexion = None
         self.cursor = None
 
-        print("self.users db ", self.users_db)
-
     def get_connexion_and_cursor(self):
         self.connexion = sqlite3.connect(self.users_db)
         self.cursor = self.connexion.cursor()
@@ -57,6 +55,20 @@ class UsersDatabase:
 
         self.connexion.close()
         return len(rows)
+
+    def find_id_by_name(self, username):
+        action = f"SELECT DISCORD_ID FROM USERS_DISCORD WHERE NAME = {username}"
+
+        self.get_connexion_and_cursor()
+        self.cursor = self.connexion.execute(action)
+
+        discord_id = self.cursor.fetchone()
+
+        self.connexion.close()
+        if discord_id is None:
+            return []
+
+        return discord_id
 
     def check_table(self):
         self.get_connexion_and_cursor()

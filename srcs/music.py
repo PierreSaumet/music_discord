@@ -10,7 +10,7 @@ from srcs.utils import *
 
 
 class Music(commands.Cog):
-    def __init__(self, bot, historic_db):
+    def __init__(self, bot, music_historic):
         self.bot = bot
         self.is_connected = False
         self.ffmpeg_options = {
@@ -39,11 +39,10 @@ class Music(commands.Cog):
             "default_search": "auto",
             "source_address": "0.0.0.0",
         }
-        print("\n\ntest self ", self.bot.test)
-        self.historic_db = historic_db
+        self.music_historic = music_historic
 
     @commands.command(
-        name="vient", help="This commands make the bot join the voice channel."
+        name="vient", help="This command makes the bot join the voice channel."
     )
     async def join(self, ctx):
         if not ctx.message.author.voice:
@@ -215,14 +214,14 @@ class Music(commands.Cog):
 
                     length = convert_int_to_hour(data["duration"])
 
-                    query_hist = self.historic_db.insert_music(
+                    query_hist = self.music_historic.insert_music(
                         data["uploader"], data["title"], length, url, str(ctx.author.id)
                     )
-                    self.historic_db.do_query(query_hist, True)
+                    self.music_historic.do_query(query_hist, True)
 
-                voice_client.play(
-                    discord.FFmpegPCMAudio(new_url, **self.ffmpeg_options)
-                )
+                # voice_client.play(
+                #     discord.FFmpegPCMAudio(new_url, **self.ffmpeg_options)
+                # )
 
             if is_embed:
                 embed = create_embed(
