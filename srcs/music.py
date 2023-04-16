@@ -42,7 +42,7 @@ class Music(commands.Cog):
         self.music_historic = music_historic
 
     @commands.command(
-        name="vient", help="This command makes the bot join the voice channel."
+        name="join", help="This command makes the bot join the voice channel."
     )
     async def join(self, ctx):
         if not ctx.message.author.voice:
@@ -112,7 +112,7 @@ class Music(commands.Cog):
 
         await ctx.send("The bot is not playing anything")
 
-    @commands.command(name="joue", help="This command plays a youtube's url")
+    @commands.command(name="play", help="This command plays a youtube's url")
     async def play(self, ctx):
         youtube_url = "https://www.youtube.com/watch?"
         msg = ctx.message.content.split()
@@ -219,9 +219,9 @@ class Music(commands.Cog):
                     )
                     self.music_historic.do_query(query_hist, True)
 
-                # voice_client.play(
-                #     discord.FFmpegPCMAudio(new_url, **self.ffmpeg_options)
-                # )
+                voice_client.play(
+                    discord.FFmpegPCMAudio(new_url, **self.ffmpeg_options)
+                )
 
             if is_embed:
                 embed = create_embed(
