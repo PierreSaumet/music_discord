@@ -8,6 +8,7 @@ from srcs.music import Music
 from srcs.utils import Colors
 from srcs.users_db import UsersDatabase
 from srcs.historic_db import MusicHistoric
+from srcs.historic_cmds import HistoricCmds
 
 load_dotenv()
 
@@ -17,7 +18,7 @@ class ETCDiscordBot(commands.Bot):
         super().__init__(command_prefix="!", intents=discord.Intents.all())
         self.is_debug = False
         self.users_db = UsersDatabase()
-        self.historic_db = MusicHistoric()
+        self.music_historic = MusicHistoric()
 
         self.test = "test"
 
@@ -44,10 +45,11 @@ class ETCDiscordBot(commands.Bot):
         # Init all Databases
         self.users_db.creates_tables_if_not_exists()
         self.users_db.insert_users(users_list)
-        self.historic_db.creates_tables_if_not_exists()
+        self.music_historic.creates_tables_if_not_exists()
 
     async def add_all_cog(self):
-        await self.add_cog(Music(self, self.historic_db))
+        await self.add_cog(Music(self, self.music_historic))
+        await self.add_cog(HistoricCmds(self, self.music_historic))
 
 
 if __name__ == "__main__":

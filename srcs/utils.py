@@ -62,7 +62,8 @@ def create_embed(colour, title, author, url, description, length=None):
     )
 
     embed.set_author(name=author)
-    embed.set_image(url=url)
+    if url:
+        embed.set_image(url=url)
     if length:
         embed.set_footer(text=length)
 
@@ -91,3 +92,35 @@ def convert_int_to_hour(integer):
     hours = integer // 60
     minutes = integer % 60
     return "{:02d}:{:02d}".format(hours, minutes)
+
+
+def parse_query_historic(msg):
+    if msg.startswith("num="):
+        num_str = msg[4:]
+        if num_str.isnumeric():
+            return num_str, None
+    elif msg.startswith("user="):
+        user_str = msg[5:]
+        if user_str.isalpha():
+            return None, user_str
+    return None, None
+
+
+def parse_messages_historics(msg_one, msg_two):
+    num_one, user_one = parse_query_historic(msg_one)
+    num_two, user_two = parse_query_historic(msg_two)
+
+    if num_one is None and user_one is None:
+        return None, None
+    elif num_two is None and user_two is None:
+        return None, None
+    elif num_one and num_two:
+        return None, None
+    elif user_one and user_two:
+        return None, None
+    elif num_one and user_two:
+        return num_one, user_two
+    elif num_two and user_one:
+        return num_two, user_one
+    else:
+        return None, None
