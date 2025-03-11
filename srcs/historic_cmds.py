@@ -16,7 +16,7 @@ class HistoricCmds(commands.Cog):
         self.music_historic = music_historic
 
     @commands.command(
-        name="hist", help="This command displays some historicsmusic query"
+        name="hist", help="This command displays 5 songs from author, num=?"
     )
     async def hist(self, ctx):
         """

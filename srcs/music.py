@@ -54,10 +54,13 @@ class Music(commands.Cog):
             return
 
         channel = ctx.message.author.voice.channel
-
         self.is_connected = True
-        await channel.connect()
 
+        try:
+            await channel.connect()
+        except Exception as e:
+            await ctx.send(f"Erreur lors de la connexion : {e}")
+        
         voice_client = ctx.message.guild.voice_client
         msg = await choose_hello_msg()
         try:

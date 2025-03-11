@@ -120,6 +120,5 @@ class MusicHistoric:
     def display(self, to_display):
         ret = []
         for item in to_display:
-            print("item = ", item)
             ret.append(item)
         return ret
